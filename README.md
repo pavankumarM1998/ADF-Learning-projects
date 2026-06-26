@@ -120,6 +120,46 @@ This Spark-powered ETL job cleanses and splits transaction streams based on paym
     *   **American Express (Default):** Coalesces null fields (`coalesce(payment, 'No Payment')`) and writes to the Amex sink.
 5.  **Sinks:** Outputs files back to ADLS Gen2 using the parameterized dataset `Dataflow_Destination`.
 
+## 📊 Key Dynamic Expressions & Formulas
+
+To support dynamic processing and control flow, the pipelines and Mapping Data Flow use the following expressions and functions:
+
+### 1. Filename Filter Prefix (`Metadata.json`)
+Filters items in the sequential loop to only process files starting with the prefix "Fact":
+```json
+@startswith(item().name, 'Fact')
+```
+
+### 2. ForEach Loop Items (`Metadata.json`)
+Binds the output of the directory scan from the Get Metadata activity to the loop iterator:
+```json
+@activity('Get Metadata').output.childitems
+```
+
+### 3. Pipeline Variable Assignment (`Variable_pipeline.json`)
+Saves directory scan child items directly to a pipeline variable of type `Array`:
+```json
+@activity('Get Metadata').output.childItems
+```
+
+### 4. Dataflow Filter Logic (`Dataflow_Source.json`)
+Excludes test accounts and invalid records inside the Mapping Data Flow:
+```json
+customer_id != 12 && customer_id != 13
+```
+
+### 5. Derived Column Coalesce (`Dataflow_Source.json`)
+Replaces null values in the payment column with a default placeholder:
+```json
+payment = coalesce(payment, 'No Payment')
+```
+
+### 6. Conditional Split Rules (`Dataflow_Source.json`)
+Splits the transaction feed into three distinct output streams based on credit card networks:
+*   **Mastercard Stream:** `payment == 'mastercard'`
+*   **Visa Stream:** `payment == 'visa'`
+*   **American Express (Default):** Runs default catch-all logic.
+
 ---
 
 ## 📂 Dataset Catalog
