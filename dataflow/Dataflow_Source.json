@@ -1,0 +1,108 @@
+{
+	"name": "Dataflow_Source",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Dataflow_Source",
+						"type": "DatasetReference"
+					},
+					"name": "sourceCSV"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Dataflow_Destination",
+						"type": "DatasetReference"
+					},
+					"name": "SinkMaster"
+				},
+				{
+					"dataset": {
+						"referenceName": "Dataflow_Destination",
+						"type": "DatasetReference"
+					},
+					"name": "SinkVisa"
+				},
+				{
+					"dataset": {
+						"referenceName": "Dataflow_Destination",
+						"type": "DatasetReference"
+					},
+					"name": "SinkAmericalexpress"
+				}
+			],
+			"transformations": [
+				{
+					"name": "select"
+				},
+				{
+					"name": "filter"
+				},
+				{
+					"name": "SplitByPayment"
+				},
+				{
+					"name": "ReplaceNULL"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          transaction_id as short,",
+				"          transactional_date as timestamp,",
+				"          product_id as string,",
+				"          customer_id as short,",
+				"          payment as string,",
+				"          credit_card as long,",
+				"          loyalty_card as boolean,",
+				"          cost as double,",
+				"          quantity as short,",
+				"          price as double",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> sourceCSV",
+				"sourceCSV select(mapColumn(",
+				"          transaction_id,",
+				"          transactional_date,",
+				"          product_id,",
+				"          customer_id,",
+				"          payment,",
+				"          cost,",
+				"          price",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select",
+				"select filter(customer_id != 12 && customer_id != 13) ~> filter",
+				"filter split(payment == 'mastercard',",
+				"     payment == 'visa',",
+				"     disjoint: false) ~> SplitByPayment@(Mastercard, Visa, Americanexpress)",
+				"SplitByPayment@Americanexpress derive(payment = coalesce(payment,'No Payment')) ~> ReplaceNULL",
+				"SplitByPayment@Mastercard sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SinkMaster",
+				"SplitByPayment@Visa sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SinkVisa",
+				"ReplaceNULL sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SinkAmericalexpress"
+			]
+		}
+	}
+}

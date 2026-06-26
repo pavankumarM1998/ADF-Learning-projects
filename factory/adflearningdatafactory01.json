@@ -1,0 +1,15 @@
+{
+	"name": "adflearningdatafactory01",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Disabled",
+			"editable": true
+		}
+	},
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "f1a5d2d4-fb76-4397-96e6-4a2d62bbe61a",
+		"tenantId": "5f75dd78-215b-4c9d-a0f4-80b258bcbb4d"
+	}
+}
