@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "adflearningdatafactory01"
+		},
+		"AzureDataLakeStorage1_accountKey": {
+			"value": ""
+		},
+		"AzureDataLakeStorage1_properties_typeProperties_url": {
+			"value": "https://adflearningstorageindia.dfs.core.windows.net/"
+		},
+		"Git_properties_typeProperties_url": {
+			"value": "https://raw.githubusercontent.com"
+		},
+		"Manage_trigger_properties_typeProperties_scope": {
+			"value": "/subscriptions/80cd0bf4-2bdb-4fa9-9ce8-07fd8d7071e6/resourceGroups/ADFlearning/providers/Microsoft.Storage/storageAccounts/adflearningstorageindia"
+		}
+	}
+}
